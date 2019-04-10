@@ -1,0 +1,15 @@
+taxonomy:
+  - Chocolate
+
+rules:
+  - name: chocolate1
+    label: Chocolate
+    type: token
+    pattern: |
+      [entity=/^B/] [entity=/^I/]* [entity=/^I/ & lemma=chocolate]
+
+  - name: chocolate2
+    label: Chocolate
+    type: token
+    pattern: |
+      [lemma=chocolate]
