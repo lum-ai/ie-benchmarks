@@ -1,0 +1,28 @@
+taxonomy:
+  - Person
+  - Title
+  - HasTitle
+
+rules:
+  - name: person
+    label: Person
+    priority: 1
+    type: token
+    pattern: |
+      [entity="I-PER"]+
+
+  - name: title
+    label: Title
+    priority: 1
+    type: token
+    pattern: |
+      [tag=NNP]+
+
+  - name: has-title
+    label: HasTitle
+    priority: 2
+    type: dependency
+    pattern: |
+      trigger = "called"
+      person: Person = <nsubjpass
+      title: Title = >dobj

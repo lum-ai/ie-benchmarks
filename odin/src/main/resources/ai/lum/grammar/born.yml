@@ -1,0 +1,28 @@
+taxonomy:
+  - Person
+  - Date
+  - BornIn
+
+rules:
+  - name: person
+    label: Person
+    priority: 1
+    type: token
+    pattern: |
+      [entity="I-PER"]+
+
+  - name: date
+    label: Date
+    priority: 1
+    type: token
+    pattern: |
+      /^\d\d\d\d$/
+
+  - name: born-in
+    label: BornIn
+    priority: 2
+    type: dependency
+    pattern: |
+      trigger = born
+      person: Person = >/nsubj(pass)?/
+      date: Date = >/nmod/{,2} >nmod_in

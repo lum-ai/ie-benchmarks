@@ -17,11 +17,17 @@ object FileUtils {
     files.map(deserializeDoc)
   }
 
+  def listFiles(s: String): Seq[File] = listFiles(new File(s))
+
+  def listFiles(f: File): Seq[File] = {
+    f.listFilesByRegex(SUPPORTED_EXTENSIONS, recursive = true).toSeq
+  }
+
   def deserializeDoc(f: File): ProcessorsDocument = f.getName.toLowerCase match {
-    // any color as long as it's black
+    // any color so long as it is black
     case json if json.endsWith(".json") => JSONSerializer.toDocument(f)
     case other =>
-      throw new Exception(s"Cannot deserialize ${f.getName} to org.clulab.processors.Document. Unsupported extension '$other'")
+      throw new Exception(s"Cannot deserialize ${f.getName}. Unsupported extension '$other'")
   }
 
   def writeTsv(strings: Seq[Seq[String]], file: String, sep: String = "\t"): Unit = {
