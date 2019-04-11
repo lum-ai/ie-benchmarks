@@ -1,0 +1,28 @@
+taxonomy:
+  - NP
+  - System
+  - SubjectSystem
+
+rules:
+  - name: system
+    label: System
+    priority: 1
+    type: token
+    pattern: |
+      [chunk="B-NP"]? [chunk="I-NP"]* [lemma=system] (?! [chunk="I-NP"])
+
+  - name: np
+    label: NP
+    priority: 1
+    type: token
+    pattern: |
+      [chunk="B-NP"] [chunk="I-NP"]*
+
+  - name: subject-system
+    label: SubjectSystem
+    priority: 2
+    type: dependency
+    pattern: |
+      trigger = [lemma=be & incoming=cop]
+      system: System = <cop (type >nmod_of)?
+      systemName: NP = <cop >nsubj
