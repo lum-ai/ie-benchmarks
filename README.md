@@ -50,5 +50,14 @@ sbt "odinson/runMain ai.lum.benchmarks.odinson.IndexDocuments -i 10K -o 10k-inde
 ### Benchmarking
 
 ```bash
-sbt "odinson/runMain ai.lum.benchmarks.odinson.BenchmarkQueries -i 5k-index -q example-1.odinson -r 1000 -o odinson-benchmarks/5k"
+sbt "odinson/runMain ai.lum.benchmarks.odinson.BenchmarkQueries -i 5k-index -q example-1.odinson -n 1000 -o output/5k/odinson"
+```
+
+
+## Odin
+
+### Benchmarking
+
+```bash
+sbt "odin/runMain ai.lum.benchmarks.odin.BenchmarkQueries -d 5K -g queries/odin/system.yml -n 1000 -o output/5k/odin"
 ```

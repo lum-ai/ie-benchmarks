@@ -4,6 +4,7 @@ import java.io.File
 
 import ai.lum.benchmarks.BuildInfo
 import ai.lum.common.ConfigUtils._
+import ai.lum.common.FileUtils._
 import ai.lum.odinson.ExtractorEngine
 import ai.lum.odinson.compiler.QueryCompiler
 import ai.lum.odinson.digraph.Vocabulary
@@ -21,7 +22,7 @@ object BenchmarkQueries extends LazyLogging {
   case class CLIArgs(
     indexDir: Option[File] = None,
     queriesFile: Option[File] = None,
-    runs: Option[Int] = None,
+    numIterations: Option[Int] = None,
     outDir: Option[File] = None
   )
 
@@ -29,7 +30,7 @@ object BenchmarkQueries extends LazyLogging {
 
   def main(args: Array[String]): Unit = {
 
-    val appName = "odinson-benchmarks"
+    val appName = "benchmark-odinson"
     val parser = new scopt.OptionParser[CLIArgs](appName) {
 
       head(appName, s"${BuildInfo.version}")
@@ -44,8 +45,8 @@ object BenchmarkQueries extends LazyLogging {
         c.copy(queriesFile = Some(qf))
       } text { "Path to a file of Odinson queries." }
 
-      opt[Int]("runs").abbr("r").valueName("1000") action { case (numRuns, c) =>
-        c.copy(runs = Some(numRuns))
+      opt[Int]("repetitions").abbr("n").valueName("1000") action { case (n, c) =>
+        c.copy(numIterations = Some(n))
       } text { "Number of extraction iterations." }
 
       opt[File]("out").abbr("o").valueName("/path/to/output/dir") action { case (out, c) =>
@@ -55,16 +56,20 @@ object BenchmarkQueries extends LazyLogging {
     }
 
     val res: Option[CLIArgs] = parser.parse(args, CLIArgs())
-    if (res.isEmpty || res.map(_.indexDir).isEmpty || res.map(_.queriesFile).isEmpty || res.map(_.runs).isEmpty || res.map(_.outDir).isEmpty) {
+    if (res.isEmpty || res.map(_.indexDir).isEmpty || res.map(_.queriesFile).isEmpty || res.map(_.numIterations).isEmpty || res.map(_.outDir).isEmpty) {
       sys.exit(1)
     }
 
     val indexDir    = res.get.indexDir.get
     val vocabFile   = new File(indexDir, "dependenciesVocabulary.txt")
     val queriesFile = res.get.queriesFile.get
-    val outFile     = new File(res.get.outDir.get, s"${queriesFile.getName}.tsv")
+    val outDir      = res.get.outDir.get
+    val outFile     = new File(outDir, s"${queriesFile.getBaseName}.tsv")
 
-    val ee: ExtractorEngine = {
+    outDir.mkdirs()
+
+
+    val (ee, loadTime) = time {
       val indexReader      = DirectoryReader.open(FSDirectory.open(indexDir.toPath))
       val indexSearcher    = new OdinsonIndexSearcher(indexReader)
       val jdbcUrl          = config[String]("state.jdbc.url")
@@ -90,24 +95,27 @@ object BenchmarkQueries extends LazyLogging {
     logger.info(s"       Index: ${indexDir.getCanonicalPath}")
     logger.info(s"Queries file: ${queriesFile.getCanonicalPath}")
 
-    val bufferedSource = scala.io.Source.fromFile(queriesFile)
-    val queries = for {
-      line <- bufferedSource.getLines
-      clean = line.trim
-      if clean.nonEmpty
-    } yield clean
-
-    bufferedSource.close
+    // NOTE: Currently, we're assuming this file contains a single query
+    val queries = queriesFile.readString().trim
 
     val results: Seq[Seq[String]] = for {
-      run <- 0 until res.get.runs.get
+      i <- 0 until res.get.numIterations.get
     } yield {
         val (res, timeElapsed) = time {
-          val queryString = queries.mkString("\n")
-          ee.query(queryString)
+
+          ee.query(queries)
         }
-        // system, query, num. extractions, time elapsed
-        Seq("odinson", queriesFile.getName, res.totalHits.toString, timeElapsed.toString)
+
+        // system, run, query file, index dir, doc load time, num. extractions, extraction time
+        Seq(
+          "odinson",                // name of the IE system being measured
+          i.toString,               // iteration of the system
+          queriesFile.getName,      // IE grammar
+          indexDir.getName,         // corpus dir
+          loadTime.toString,        // load time (NOTE: this is calculated only once)
+          res.totalHits.toString,   // num. extractions
+          timeElapsed.toString      // extraction time
+        )
     }
 
     writeTsv(results, outFile, sep = "\t")
