@@ -9,14 +9,14 @@ rules:
     priority: 1
     type: token
     pattern: |
-      [entity="I-PER"]+
+      [entity="I-PER" & incoming=/nsubj(pass)?/]
 
   - name: date
     label: Date
     priority: 1
     type: token
     pattern: |
-      /^\d\d\d\d$/
+      [word=/^\d{4}$/ & incoming=nmod_in]
 
   - name: born-in
     label: BornIn
@@ -25,4 +25,4 @@ rules:
     pattern: |
       trigger = born
       person: Person = >/nsubj(pass)?/
-      date: Date = >/nmod/{,2} >nmod_in
+      date: Date = >/nmod_/* >nmod_in

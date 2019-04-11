@@ -1,0 +1,1 @@
+(?<person> [entity="I-PER"]) <nsubjpass called >dobj (?<title> [tag=/NNP/])

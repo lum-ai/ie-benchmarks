@@ -1,0 +1,14 @@
+taxonomy:
+  - Person
+  - Organization
+  - President
+
+rules:
+  - name: president
+    label: President
+    priority: 2
+    type: token
+    pattern: |
+      (?<person> [entity="I-PER"]+)
+      [lemma=be] the? president of
+      the? (?<organization> [entity="I-ORG"]+)
