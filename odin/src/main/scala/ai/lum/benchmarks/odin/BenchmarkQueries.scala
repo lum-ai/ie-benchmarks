@@ -63,6 +63,8 @@ object BenchmarkQueries extends App with LazyLogging {
     run <- 0 until res.get.repetitions
     extractorEngine = ExtractorEngine.fromRules(rules)
   } yield {
+    logger.info(s"repetition ${run + 1}")
+
     val (loadTimes, numExtractions, extractionTimes) = documents.par.map { docName =>
       val (document, deserElapsedTime) = time { deserializeDoc(docName) }
       val (mns, extractElapsedTime) = time { extractorEngine.extractFrom(document) }
