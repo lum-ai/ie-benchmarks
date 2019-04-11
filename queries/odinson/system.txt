@@ -1,1 +1,1 @@
-[lemma=system] <cop [lemma=be] >nsubj (?<systemName> [tag=/NN.*/])
+[lemma=be] <cop [lemma=system] >nsubj (?<systemName> [tag=/NN.*/])

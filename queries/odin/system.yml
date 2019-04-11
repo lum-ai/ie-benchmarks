@@ -16,7 +16,7 @@ rules:
     priority: 1
     type: token
     pattern: |
-      [tag=/NN/ & incoming=nsubj]
+      [tag=/^NN/ & incoming=nsubj]
 
   - name: subject-system
     label: SubjectSystem

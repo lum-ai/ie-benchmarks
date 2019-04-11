@@ -9,14 +9,14 @@ rules:
     priority: 1
     type: token
     pattern: |
-      [entity="I-PER"]+
+      [entity="I-PER" & incoming=nsubjpass]
 
   - name: title
     label: Title
     priority: 1
     type: token
     pattern: |
-      [tag=/NNP/]+
+      [tag=/^NNP/ & incoming=xcomp]+
 
   - name: has-title
     label: HasTitle
@@ -24,5 +24,5 @@ rules:
     type: dependency
     pattern: |
       trigger = "called"
-      person: Person = <nsubjpass
-      title: Title = >dobj
+      person: Person = >nsubjpass
+      title: Title = >xcomp
