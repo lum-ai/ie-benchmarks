@@ -3,11 +3,11 @@ package ai.lum.benchmarks.odin
 import java.io.File
 
 import ai.lum.common.FileUtils._
-import ai.lum.shared.FileUtils.{ deserializeDoc, writeTsv }
+import ai.lum.shared.FileUtils.{deserializeDoc, writeTsv}
 import ai.lum.shared.Timer.time
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
-import org.clulab.odin.ExtractorEngine
+import org.clulab.odin.{ExtractorEngine, TextBoundMention}
 import org.json4s.BuildInfo
 
 object BenchmarkQueries extends App with LazyLogging {
@@ -50,14 +50,14 @@ object BenchmarkQueries extends App with LazyLogging {
   val outDir: File = res.get.outDir
   outDir.mkdirs()
 
-  val outFile: File = new File(outDir, s"${outDir.getBaseName()}.tsv")
+  val outFile: File = new File(outDir, s"${grammarFile.getBaseName()}.tsv")
   val rules: String = res.get.grammarFile.readString()
 
   val documents: Seq[File] = res.get.docsDir.listFilesByWildcard("*.json", recursive = true).toVector
 
   logger.info(s"${documents.length} documents")
   logger.info(s"${res.get.repetitions} runs")
-  logger.info(s"Writing to ${outFile.getCanonicalPath}")
+  logger.info(s"Results location: ${outFile.getCanonicalPath}")
 
   val extractionResults: Seq[Seq[String]] = for {
     run <- 0 until res.get.repetitions
@@ -66,8 +66,8 @@ object BenchmarkQueries extends App with LazyLogging {
     val (loadTimes, numExtractions, extractionTimes) = documents.par.map { docName =>
       val (document, deserElapsedTime) = time { deserializeDoc(docName) }
       val (mns, extractElapsedTime) = time { extractorEngine.extractFrom(document) }
-      // for benchmarking, only retain the *number* of matches
-      (deserElapsedTime, mns.size, extractElapsedTime)
+      // for benchmarking, only retain the *number* of non-TBM matches
+      (deserElapsedTime, mns.count(!_.isInstanceOf[TextBoundMention]), extractElapsedTime)
     }.unzip3
 
     Seq(
