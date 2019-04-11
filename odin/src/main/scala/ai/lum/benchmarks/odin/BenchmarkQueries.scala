@@ -53,7 +53,6 @@ object BenchmarkQueries extends App with LazyLogging {
   val outFile: File = new File(outDir, s"${outDir.getBaseName()}.tsv")
   val rules: String = res.get.grammarFile.readString()
 
-//  val documents: Seq[ProcessorsDocument] = docsFromDir(res.get.docsDir)
   val documents: Seq[File] = res.get.docsDir.listFilesByWildcard("*.json", recursive = true).toVector
 
   logger.info(s"${documents.length} documents")
@@ -71,18 +70,13 @@ object BenchmarkQueries extends App with LazyLogging {
       (deserElapsedTime, mns.size, extractElapsedTime)
     }.unzip3
 
-
-//    if(run == 0) {
-//      println(extractions.flatMap(_.filter(! _.isInstanceOf[TextBoundMention]).map(_.text)).mkString("\n"))
-//    }
-
     Seq(
       "odin",                           // IE system
       run.toString,                     // repetition for benchmarking the system
-      res.get.grammarFile.getName(),    // grammar file
+      res.get.grammarFile.getName,    // grammar file
       res.get.docsDir.getName,          // docs directory
       loadTimes.sum.toString,           // document load time
-      numExtractions.toString,          // number of extractions
+      numExtractions.sum.toString,      // number of extractions
       extractionTimes.sum.toString      // extraction time
     )
   }
