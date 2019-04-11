@@ -72,23 +72,23 @@ object BenchmarkQueries extends LazyLogging {
     val (ee, loadTime) = time {
       val indexReader      = DirectoryReader.open(FSDirectory.open(indexDir.toPath))
       val indexSearcher    = new OdinsonIndexSearcher(indexReader)
-      val jdbcUrl          = config[String]("state.jdbc.url")
+      val jdbcUrl          = config[String]("odinson.state.jdbc.url")
       val state            = new State(jdbcUrl)
       state.init()
 
       val compiler         = new QueryCompiler(
-        config[List[String]]("allTokenFields"),
-        config[String]("defaultTokenField"),
-        config[String]("sentenceLengthField"),
-        config[String]("dependenciesField"),
-        config[String]("incomingTokenField"),
-        config[String]("outgoingTokenField"),
+        config[List[String]]("odinson.compiler.allTokenFields"),
+        config[String]("odinson.compiler.defaultTokenField"),
+        config[String]("odinson.compiler.sentenceLengthField"),
+        config[String]("odinson.compiler.dependenciesField"),
+        config[String]("odinson.compiler.incomingTokenField"),
+        config[String]("odinson.compiler.outgoingTokenField"),
         Vocabulary.fromFile(vocabFile),
-        config[Boolean]("normalizeQueriesToDefaultField")
+        config[Boolean]("odinson.compiler.normalizeQueriesToDefaultField")
       )
       compiler.setState(state)
 
-      val parentDocIdField = config[String]("index.documentIdField")
+      val parentDocIdField = config[String]("odinson.index.documentIdField")
       new ExtractorEngine(indexSearcher, compiler, state, parentDocIdField)
     }
 
@@ -101,10 +101,7 @@ object BenchmarkQueries extends LazyLogging {
     val results: Seq[Seq[String]] = for {
       i <- 0 until res.get.numIterations.get
     } yield {
-        val (res, timeElapsed) = time {
-
-          ee.query(queries)
-        }
+        val (res, timeElapsed) = time { ee.query(queries) }
 
         // system, run, query file, index dir, doc load time, num. extractions, extraction time
         Seq(
@@ -120,7 +117,4 @@ object BenchmarkQueries extends LazyLogging {
 
     writeTsv(results, outFile, sep = "\t")
   }
-
-
-
 }
