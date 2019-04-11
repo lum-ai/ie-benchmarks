@@ -103,7 +103,6 @@ object BenchmarkQueries extends LazyLogging {
     } yield {
         val (res, timeElapsed) = time { ee.query(queries) }
 
-        // system, run, query file, index dir, doc load time, num. extractions, extraction time
         Seq(
           "odinson",                // name of the IE system being measured
           i.toString,               // iteration of the system
