@@ -1,10 +1,12 @@
 package ai.lum
 
+import java.io.File
+
 import ai.lum.RuleUtils._
 import ai.lum.shared.Timer._
 import ai.lum.shared.FileUtils._
 import org.clulab.processors.{Document => ProcessorsDocument}
-import org.clulab.odin.{EventMention, ExtractorEngine, TextBoundMention}
+import org.clulab.odin.{ExtractorEngine, TextBoundMention}
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
 import org.json4s.BuildInfo
@@ -46,7 +48,8 @@ object BenchmarkOdin extends App with LazyLogging {
   }
   val ruleSets: Seq[(String, String)] = mkRules(res.get.grammarLoc)
 
-  val documents: Seq[ProcessorsDocument] = docsFromDir(res.get.docsDir)
+//  val documents: Seq[ProcessorsDocument] = docsFromDir(res.get.docsDir)
+  val documents: Seq[File] = listFiles(res.get.docsDir)
 
   logger.info(s"${documents.length} documents")
   logger.info(s"${res.get.runs} runs")
@@ -57,19 +60,27 @@ object BenchmarkOdin extends App with LazyLogging {
     extractorEngine = ExtractorEngine.fromRules(ruleSet)
     run <- 0 until res.get.runs
   } yield {
-    val (extractions, timeElapsed) = time { documents map extractorEngine.extractFrom }
+    val (loadTime, extractionsAndTime) = documents.par.map { docName =>
+      val documentAndTime = time { deserializeDoc(docName) }
+      val document = documentAndTime._1
+      val extractionAndTime = time { extractorEngine.extractFrom(document) }
+      (documentAndTime._2, extractionAndTime)
+    }.unzip
+
+    val (extractions, extractionTime) = extractionsAndTime.unzip
 
 //    if(run == 0) {
 //      println(extractions.flatMap(_.filter(! _.isInstanceOf[TextBoundMention]).map(_.text)).mkString("\n"))
 //    }
 
-    // extractor, ruleset, # documents # extractions, time elapsed
+    // extractor, ruleset, # documents, document load time, # extractions, extraction time
     Seq(
       "odin",
       ruleName,
       documents.length.toString,
+      loadTime.sum.toString,
       extractions.map(_.length).sum.toString,
-      timeElapsed.toString
+      extractionTime.sum.toString
     )
   }
 

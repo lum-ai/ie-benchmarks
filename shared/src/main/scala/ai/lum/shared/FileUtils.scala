@@ -17,6 +17,12 @@ object FileUtils {
     files.map(deserializeDoc)
   }
 
+  def listFiles(s: String): Seq[File] = listFiles(new File(s))
+
+  def listFiles(f: File): Seq[File] = {
+    f.listFilesByRegex(SUPPORTED_EXTENSIONS, recursive = true).toSeq
+  }
+
   def deserializeDoc(f: File): ProcessorsDocument = f.getName.toLowerCase match {
     // any color so long as it is black
     case json if json.endsWith(".json") => JSONSerializer.toDocument(f)
