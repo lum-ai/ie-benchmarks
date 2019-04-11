@@ -16,7 +16,7 @@ rules:
     priority: 1
     type: token
     pattern: |
-      [tag=NNP]+
+      [tag=/NNP/]+
 
   - name: has-title
     label: HasTitle
