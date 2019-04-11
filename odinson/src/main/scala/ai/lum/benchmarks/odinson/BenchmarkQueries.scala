@@ -106,7 +106,7 @@ object BenchmarkQueries extends LazyLogging {
         Seq(
           "odinson",                // name of the IE system being measured
           i.toString,               // iteration of the system
-          queriesFile.getName,      // IE grammar
+          queriesFile.getBaseName,  // IE grammar
           indexDir.getName,         // corpus dir
           loadTime.toString,        // load time (NOTE: this is calculated only once)
           res.totalHits.toString,   // num. extractions

@@ -2,13 +2,14 @@ package ai.lum.benchmarks.odin
 
 import java.io.File
 
-import ai.lum.common.FileUtils._
-import ai.lum.shared.FileUtils.{deserializeDoc, writeTsv}
-import ai.lum.shared.Timer.time
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
-import org.clulab.odin.{ExtractorEngine, TextBoundMention}
 import org.json4s.BuildInfo
+import org.clulab.odin.{ExtractorEngine, TextBoundMention}
+import ai.lum.common.FileUtils._
+
+import ai.lum.shared.FileUtils.{deserializeDoc, writeTsv}
+import ai.lum.shared.Timer.time
 
 object BenchmarkQueries extends App with LazyLogging {
   val config = ConfigFactory.load()
@@ -75,7 +76,7 @@ object BenchmarkQueries extends App with LazyLogging {
     Seq(
       "odin",                           // IE system
       run.toString,                     // repetition for benchmarking the system
-      res.get.grammarFile.getName,    // grammar file
+      res.get.grammarFile.getBaseName,  // grammar file
       res.get.docsDir.getName,          // docs directory
       loadTimes.sum.toString,           // document load time
       numExtractions.sum.toString,      // number of extractions
