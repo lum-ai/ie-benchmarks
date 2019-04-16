@@ -50,7 +50,7 @@ sbt "odinson/runMain ai.lum.benchmarks.odinson.IndexDocuments -i 10K -o 10k-inde
 ### Benchmarking
 
 ```bash
-sbt "odinson/runMain ai.lum.benchmarks.odinson.BenchmarkQueries -i 5k-index -q example-1.odinson -n 1000 -o output/5k/odinson"
+sbt "odinson/runMain ai.lum.benchmarks.odinson.BenchmarkQueries -i 5k-index -q queries/odinson/president.txt -n 1000 -o output/5k/odinson"
 ```
 
 
