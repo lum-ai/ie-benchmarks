@@ -1,7 +1,7 @@
 name := "benchmarks-odinson"
 
 libraryDependencies ++= {
-  val odinsonVersion   = "0.1.0-SNAPSHOT"
+  val odinsonVersion   = "0.2.0-SNAPSHOT"
 
   Seq(
     "ai.lum"        %% "odinson-core"          % odinsonVersion

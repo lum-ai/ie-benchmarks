@@ -8,7 +8,7 @@ import org.json4s.BuildInfo
 import org.clulab.odin.{ExtractorEngine, TextBoundMention}
 import ai.lum.common.FileUtils._
 
-import ai.lum.shared.FileUtils.{deserializeDoc, writeTsv}
+import ai.lum.shared.FileUtils.{deserializeDoc, writeTsv, convertDocument}
 import ai.lum.shared.Timer.time
 
 object BenchmarkQueries extends App with LazyLogging {
@@ -33,7 +33,7 @@ object BenchmarkQueries extends App with LazyLogging {
     } text "A path to a file containing an Odin grammar."
     opt[File]('d', "documents") action { (d, c) =>
       c.copy(docsDir = d)
-    } text "A path to a directory with JSON-formatted Processors Documents."
+    } text "A path to a directory with JSON-formatted Odinson Documents."
     opt[Int]('n', "repetitions") action { (r, c) =>
       c.copy(repetitions = r)
     } text "Number of extraction iterations"
@@ -67,7 +67,7 @@ object BenchmarkQueries extends App with LazyLogging {
     logger.info(s"repetition ${run + 1}")
 
     val (loadTimes, numExtractions, extractionTimes) = documents.par.map { docName =>
-      val (document, deserElapsedTime) = time { deserializeDoc(docName) }
+      val (document, deserElapsedTime) = time { convertDocument(deserializeDoc(docName)) }
       val (mns, extractElapsedTime) = time { extractorEngine.extractFrom(document) }
       // for benchmarking, only retain the *number* of non-TBM matches
       (deserElapsedTime, mns.count(!_.isInstanceOf[TextBoundMention]), extractElapsedTime)
