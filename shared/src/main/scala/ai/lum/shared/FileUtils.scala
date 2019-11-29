@@ -84,7 +84,7 @@ object FileUtils {
   def getOffsets(tokens: Array[String]): (Array[Int], Array[Int]) = {
     tokens.foldLeft(List[(Int, Int)]()){ (r,c) =>
       // startOffset = last endOffset + 1
-      val startOffset = r.head._2 + 1
+      val startOffset = if(r.isEmpty) 0 else r.head._2 + 1
       // endOffset = this startOffset + word length
       (startOffset, startOffset + c.length) :: r
     }.reverse.toArray.unzip
