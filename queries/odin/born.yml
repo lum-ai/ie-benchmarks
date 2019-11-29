@@ -9,7 +9,7 @@ rules:
     priority: 1
     type: token
     pattern: |
-      [entity="I-PER" & incoming=/nsubj(pass)?/]
+      [entity="PERSON" & incoming=/nsubj(pass)?/]
 
   - name: date
     label: Date

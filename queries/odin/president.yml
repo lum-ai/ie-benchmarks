@@ -9,6 +9,6 @@ rules:
     priority: 2
     type: token
     pattern: |
-      (?<person> [entity="I-PER"]+)
+      (?<person> [entity="PERSON"]+)
       [lemma=be] the? president of
-      the? (?<organization> [entity="I-ORG"]+)
+      the? (?<organization> [entity="ORGANIZATION"]+)

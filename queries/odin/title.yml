@@ -9,7 +9,7 @@ rules:
     priority: 1
     type: token
     pattern: |
-      [entity="I-PER" & incoming=nsubjpass]
+      [entity="PERSON" & incoming=nsubjpass]
 
   - name: title
     label: Title
