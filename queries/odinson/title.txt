@@ -1,1 +1,1 @@
-(?<person> [entity="I-PER"]) <nsubjpass called >xcomp (?<title> [tag=/NNP.*/])
+(?<person> [entity="PERSON"]) <nsubjpass called >xcomp (?<title> [tag=/NNP.*/])

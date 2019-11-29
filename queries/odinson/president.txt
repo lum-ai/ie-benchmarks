@@ -1,1 +1,1 @@
-(?<person> [entity="I-PER"]+) [lemma=be] the? president of the? (?<organization> [entity="I-ORG"]+)
+(?<person> [entity="PERSON"]+) [lemma=be] the? president of the? (?<organization> [entity="ORGANIZATION"]+)

@@ -1,1 +1,1 @@
-(?<person> [entity="I-PER"]) </nsubj(pass)?/ born >/nmod_.*/* >nmod_in (?<year> /[0-9]{4}/)
+(?<person> [entity="PERSON"]) </nsubj(pass)?/ born >/nmod_.*/* >nmod_in (?<year> /[0-9]{4}/)
