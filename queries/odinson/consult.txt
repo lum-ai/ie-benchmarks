@@ -1,0 +1,3 @@
+trigger = [lemma=consult & tag=/VB[DZPGN]/]
+actor1: ^Entity+ = <acl? >/nsubj(pass)?/ >/conj|compound|amod|nmod_(such_as|including)|appos/{,2} [entity=/PERSON|ORGANIZATION/]+
+actor2: ^Entity+ = (>nmod_with | >dobj)? >/conj|compound|amod|nmod_(such_as|including)|appos|dep/{,3} [entity=/PERSON|ORGANIZATION/]+
