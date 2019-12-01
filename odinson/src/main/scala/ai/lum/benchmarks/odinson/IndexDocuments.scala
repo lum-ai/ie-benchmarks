@@ -7,13 +7,16 @@ import ai.lum.benchmarks.BuildInfo
 import ai.lum.common.ConfigUtils._
 import ai.lum.common.FileUtils._
 import ai.lum.odinson.OdinsonIndexWriter
+import ai.lum.odinson.digraph.Vocabulary
 import ai.lum.odinson.lucene.analysis.{DependencyTokenStream, NormalizedTokenStream, OdinsonTokenStream}
+import ai.lum.odinson.serialization.UnsafeSerializer
 import ai.lum.shared.Timer.time
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.lucene.util.BytesRef
 import org.apache.lucene.document.{Document => LuceneDocument, _}
 import org.apache.lucene.document.Field.Store
+import org.apache.lucene.store.FSDirectory
 import org.clulab.processors.{Sentence, Document => ProcessorsDocument}
 import org.clulab.serialization.json.JSONSerializer
 
@@ -73,9 +76,29 @@ object IndexDocuments extends LazyLogging {
     logger.info(s"Input directory: ${docsDir.getCanonicalPath}")
     logger.info(s"Index directory: ${indexDir.getCanonicalPath}")
 
-    val dependenciesVocabularyFile = new File(indexDir, "dependenciesVocabulary.txt")
+    val dir = FSDirectory.open(res.get.indexDest.get.toPath)
+    val dependenciesVocabularyFile = Vocabulary.fromDirectory(dir)
+    val addToNormalizedField: Set[String] = Set(
+      rawTokenField,
+      wordTokenField,
+      lemmaTokenField,
+      posTagTokenField,
+      chunkTokenField,
+      entityTokenField)
 
-    val writer = new OdinsonIndexWriter(indexDir, dependenciesVocabularyFile)
+    val writer = new OdinsonIndexWriter(
+      dir,
+      dependenciesVocabularyFile,
+      documentIdField,
+      sentenceIdField,
+      sentenceLengthField,
+      normalizedTokenField,
+      addToNormalizedField,
+      incomingTokenField,
+      outgoingTokenField,
+      sortedDocValuesFieldMaxSize,
+      maxNumberOfTokensPerSentence
+    )
 
     val (_, timeElapsed) = time {
       docsDir
@@ -143,7 +166,7 @@ object IndexDocuments extends LazyLogging {
     sentenceDoc.add(new TextField(rawTokenField, new OdinsonTokenStream(s.raw)))
     // we want to index and store the words for displaying in the shell
     sentenceDoc.add(new TextField(wordTokenField, s.words.mkString(" "), Store.YES))
-    sentenceDoc.add(new TextField(normalizedTokenField, new NormalizedTokenStream(s.raw, s.words)))
+    sentenceDoc.add(new TextField(normalizedTokenField, new NormalizedTokenStream(Seq(s.raw, s.words))))
     if (s.tags.isDefined) {
       sentenceDoc.add(new TextField(posTagTokenField, new OdinsonTokenStream(s.tags.get)))
     }
@@ -161,7 +184,7 @@ object IndexDocuments extends LazyLogging {
       sentenceDoc.add(new TextField(incomingTokenField, new DependencyTokenStream(deps.incomingEdges)))
       sentenceDoc.add(new TextField(outgoingTokenField, new DependencyTokenStream(deps.outgoingEdges)))
       val graph = writer.mkDirectedGraph(deps.incomingEdges, deps.outgoingEdges, deps.roots.toArray)
-      val bytes = graph.toBytes
+      val bytes = UnsafeSerializer.graphToBytes(graph)
       if (bytes.length <= sortedDocValuesFieldMaxSize) {
         sentenceDoc.add(new SortedDocValuesField(dependenciesField, new BytesRef(bytes)))
       } else {

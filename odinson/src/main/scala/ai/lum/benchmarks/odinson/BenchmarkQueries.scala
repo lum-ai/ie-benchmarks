@@ -71,7 +71,7 @@ object BenchmarkQueries extends LazyLogging {
 
     val (ee, loadTime) = time {
       val indexReader      = DirectoryReader.open(FSDirectory.open(indexDir.toPath))
-      val indexSearcher    = new OdinsonIndexSearcher(indexReader)
+      val indexSearcher    = new OdinsonIndexSearcher(indexReader, computeTotalHits = true)
       val jdbcUrl          = config[String]("odinson.state.jdbc.url")
       val state            = new State(jdbcUrl)
       state.init()
@@ -83,13 +83,18 @@ object BenchmarkQueries extends LazyLogging {
         config[String]("odinson.compiler.dependenciesField"),
         config[String]("odinson.compiler.incomingTokenField"),
         config[String]("odinson.compiler.outgoingTokenField"),
-        Vocabulary.fromFile(vocabFile),
+        Vocabulary.fromDirectory(indexReader.directory()),
         config[Boolean]("odinson.compiler.normalizeQueriesToDefaultField")
       )
       compiler.setState(state)
 
       val parentDocIdField = config[String]("odinson.index.documentIdField")
-      new ExtractorEngine(indexSearcher, compiler, state, parentDocIdField)
+      new ExtractorEngine(
+        indexSearcher,
+        compiler,
+        config[String]("odinson.compiler.displayField"),
+        state,
+        parentDocIdField)
     }
 
     logger.info(s"       Index: ${indexDir.getCanonicalPath}")
