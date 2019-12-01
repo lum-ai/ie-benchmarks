@@ -100,16 +100,22 @@ object BenchmarkQueries extends LazyLogging {
     logger.info(s"       Index: ${indexDir.getCanonicalPath}")
     logger.info(s"Queries file: ${queriesFile.getCanonicalPath}")
 
+    val numDocs = ee.indexReader.numDocs()
+
     // NOTE: Currently, we're assuming this file contains a single query
     val queries = queriesFile.readString().trim
-    val numDocs = ee.indexReader.numDocs()
 
     val results: Seq[Seq[String]] = for {
       i <- 0 until res.get.numIterations.get
     } yield {
         val (res, timeElapsed) = time {
-          val q = ee.compiler.compileEventQuery(queries)
-          ee.query(q, numDocs)
+          queries match {
+            case event if event.startsWith("trigger") =>
+              val q = ee.compiler.compileEventQuery(queries)
+              ee.query(q, numDocs)
+            case flat =>
+              ee.query(flat, numDocs)
+          }
         }
 
         Seq(
