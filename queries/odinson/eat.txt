@@ -1,0 +1,4 @@
+trigger = [lemma=eat]
+theme: ^food = >dobj [chunk=B-NP] [chunk=I-NP]*
+tool: ^tool? = >nmod_with [chunk=B-NP] [chunk=I-NP]*
+location: ^place? = >nmod_at [chunk=B-NP] [chunk=I-NP]*

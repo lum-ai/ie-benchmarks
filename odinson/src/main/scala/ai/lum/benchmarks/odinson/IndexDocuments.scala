@@ -57,7 +57,7 @@ object IndexDocuments extends LazyLogging {
 
       opt[File]("documents").abbr("i").valueName("/path/to/dir/of/json/files") action { case (docsDir, c) =>
         c.copy(documentsDir = Some(docsDir))
-      } text { "A path to a directory of org.clu.processors json documents." }
+      } text { "A path to a directory of Odinson json documents." }
 
       opt[File]("out").abbr("o").valueName("/dest/of/index") action { case (out, c) =>
         c.copy(indexDest = Some(out))

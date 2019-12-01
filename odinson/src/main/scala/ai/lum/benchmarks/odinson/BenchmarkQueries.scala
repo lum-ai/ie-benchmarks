@@ -92,7 +92,7 @@ object BenchmarkQueries extends LazyLogging {
       new ExtractorEngine(
         indexSearcher,
         compiler,
-        config[String]("odinson.compiler.displayField"),
+        config[String]("odinson.compiler.defaultTokenField"),
         state,
         parentDocIdField)
     }
@@ -102,11 +102,15 @@ object BenchmarkQueries extends LazyLogging {
 
     // NOTE: Currently, we're assuming this file contains a single query
     val queries = queriesFile.readString().trim
+    val numDocs = ee.indexReader.numDocs()
 
     val results: Seq[Seq[String]] = for {
       i <- 0 until res.get.numIterations.get
     } yield {
-        val (res, timeElapsed) = time { ee.query(queries) }
+        val (res, timeElapsed) = time {
+          val q = ee.compiler.compileEventQuery(queries)
+          ee.query(q, numDocs)
+        }
 
         Seq(
           "odinson",                // name of the IE system being measured
